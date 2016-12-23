@@ -36,19 +36,42 @@
     <div class="background">
       <img :src="seller.avatar" width="100%" height="100%">
     </div>
-    <div class="detail" v-show="detailShow">
-      <div class="detail-wrapper clearfix">
-        <div class="detail-main">
-          <h1 class="name"> {{ seller.name }} </h1>
-          <div class="star-wrapper">
-            <star :size="48" :score="seller.score"></star>
+    <transition name="fade">
+      <div class="detail" v-show="detailShow">
+        <div class="detail-wrapper clearfix">
+          <div class="detail-main">
+            <h1 class="name"> {{ seller.name }} </h1>
+            <div class="star-wrapper">
+              <star :size="48" :score="seller.score"></star>
+            </div>
+            <div class="title">
+              <div class="line"></div>
+              <div class="text">优惠信息</div>
+              <div class="line"></div>
+            </div>
+            <ul v-if="seller.supports" class="supports">
+              <li class="support-item" v-for="item in seller.supports">
+                <span class="icon" :class="classMap[item.type]"></span>
+                <span class="description">
+                {{ item.description }}
+              </span>
+              </li>
+            </ul>
+            <div class="title">
+              <div class="line"></div>
+              <div class="text">商家公告</div>
+              <div class="line"></div>
+            </div>
+            <p v-if="seller.bulletin" class="bulletin">
+              {{ seller.bulletin }}
+            </p>
           </div>
         </div>
+        <div class="detail-close" @click="hideDetail">
+          <i class="icon-close"></i>
+        </div>
       </div>
-      <div class="detail-close">
-        <i class="icon-close"></i>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -72,6 +95,9 @@
     methods: {
       showDetail () {
         this.detailShow = true
+      },
+      hideDetail () {
+        this.detailShow = false
       }
     }
   }
@@ -214,9 +240,18 @@
       height: 100%
       overflow: auto
       background: rgba(7, 17, 27, 0.8)
+      backdrop-filter blur(10px)
+      &.fade-enter-active, &.fade-leave-active {
+        transition: all .5s
+        background: rgba(7, 17, 27, 0.8)
+      }
+      &.fade-enter, &.fade-leave-active {
+        opacity: 0
+        background: rgba(7, 17, 27, 0)
+      }
       .detail-wrapper
         width: 100%
-        min-height:100%
+        min-height: 100%
         .detail-main
           /*此处使用margin原因:背景不需要,漏出来比较好*/
           margin-top: 64px
@@ -226,11 +261,61 @@
             text-align center
             font-size 16px
             line-height: 16px
-            font-weight:700
+            font-weight: 700
           .star-wrapper
             padding: 2px 0
             text-align: center
             margin-top: 18px
+          .title
+            width: 80%
+            display: flex
+            margin: 28px 36px 24px 36px
+            .line
+              position: relative
+              flex: 1
+              top: -6px
+              border-bottom 1px solid rgba(255, 255, 255, 0.2)
+            .text
+              margin: 0 12px
+
+          .supports
+            width: 80%
+            margin: 0 auto
+            padding: 0 12px
+            .support-item
+              margin-bottom: 12px
+              &:last-child
+                margin-bottom: 0px
+              .icon
+                display: inline-block
+                margin-right: 6px
+                height: 16px
+                width: 16px
+                background-size: 16px 16px
+                background-repeat: no-repeat
+                vertical-align: top
+                &.decrease
+                  bg-img('decrease_2')
+                &.discount
+                  bg-img('discount_2')
+                &.special
+                  bg-img('special_2')
+                &.invoice
+                  bg-img('invoice_2')
+                &.guarantee
+                  bg-img('guarantee_2')
+                .text
+                  line-height: 16px
+                  font-size 12px
+                  font-weight: 200
+
+          .bulletin
+            width: 80%
+            margin: 0 auto
+            padding: 0 2px
+            line-height: 24px;
+            font-size 12px
+            font-weight: 200;
       .detail-close
         position: relative
         height: 32px
