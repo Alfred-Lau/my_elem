@@ -1,6 +1,6 @@
 <template>
   <div class="shopcart">
-    <div class="content">
+    <div class="content" @click="toggleList">
       <div class="content-left">
         <div class="logo-wrapper">
           <!--注意class的语法-->
@@ -12,22 +12,52 @@
         <div class="price" :class="{'highlight': totalPrice > 0}">{{totalPrice}}元</div>
         <div class="desc">另需配送费{{deliveryPrice}}元</div>
       </div>
-      <div class="content-right">
+      <div class="content-right" @click.stop.prevent="pay">
         <div class="pay" :class="payClass">{{payTotal}}</div>
       </div>
     </div>
     <div class="ball-wrapper">
       <!--能用transition尽量用,不要使用group-->
-      <transition name="drop" v-for="(ball, index) in balls" @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter">
+      <transition name="drop" v-for="(ball, index) in balls" @before-enter="beforeEnter" @enter="enter"
+                  @after-enter="afterEnter">
         <div class="ball" v-show="ball.show">
           <div class="inner inner-hook"></div>
         </div>
       </transition>
     </div>
+    <transition name="fold">
+      <div class="shopcart-list" v-show="listShow">
+        <div class="list-header">
+          <h1 class="title">购物车</h1>
+          <span class="empty" @click="empty">清空</span>
+        </div>
+        <div class="list-content" ref="listContent">
+          <ul>
+            <li class="food" v-for="food in selectFood">
+              <span class="name">{{food.name}}</span>
+              <div class="price">
+                <span>￥{{food.price*food.count}}</span>
+              </div>
+              <div class="cartcontrol-wrapper">
+                <cartcontrol :food="food"></cartcontrol>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </transition>
+    <transition name="fade">
+      <div class="mask" v-show="listShow" @click="hideList">
+
+      </div>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import cartcontrol from 'components/cartcontrol/cartcontrol'
+  import BScroll from 'better-scroll'
+
   export default {
     data () {
       return {
@@ -38,7 +68,8 @@
           {show: false},
           {show: false}
         ],
-        dropBalls: []
+        dropBalls: [],
+        fold: true
       }
     },
     props: {
@@ -63,6 +94,26 @@
       }
     },
     computed: {
+      listShow () {
+        if (!this.totalCount) {
+          this.fold = true
+          return false
+        }
+        let show = !this.fold
+        if (show) {
+          this.$nextTick(() => {
+            if (!this.scroll) {
+              this.scroll = new BScroll(this.$refs.listContent, {
+                click: true
+              })
+            } else {
+              this.scroll.refresh()
+            }
+          })
+        }
+        console.log(show)
+        return show
+      },
       totalPrice () {
         let total = 0
         this.selectFood.forEach((food) => {
@@ -95,6 +146,26 @@
       }
     },
     methods: {
+      empty () {
+        this.selectFood.forEach((food) => {
+          food.count = 0
+        })
+      },
+      pay () {
+        if (this.totalPrice < this.minPrice) {
+          return
+        }
+        window.alert(`支付${this.totalPrice}元`)
+      },
+      toggleList () {
+        if (!this.totalCount) {
+          return
+        }
+        this.fold = !this.fold
+      },
+      hideList () {
+        this.fold = true
+      },
       beforeEnter (el) {
         let count = this.balls.length
         while (count--) {
@@ -142,23 +213,28 @@
           }
         }
       }
+    },
+    components: {
+      cartcontrol
     }
   }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
+  @import "../../common/stylus/mixin.styl"
+
   .shopcart
     position: fixed
     bottom: 0
     left: 0
     width: 100%
     height: 48px
-    background: #000
+    z-index: 100
     .content
       display: flex
       background: #141d27
       color: rgba(255, 255, 255, 0.4)
-      font-size 0px
+      font-size 0
       .content-left
         flex: 1
         .logo-wrapper
@@ -251,4 +327,81 @@
           transition: all 0.4s linear
         &.drop-leave-active
           transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+
+    .shopcart-list
+      position: absolute
+      left: 0
+      top: 0
+      z-index: -1
+      width: 100%
+      /*表示终止状态*/
+      transform: translate3d(0, -100%, 0)
+      .list-header
+        height: 40px
+        line-height: 40px
+        padding: 0 18px
+        background: #f3f5f7
+        border-bottom: 1px solid rgba(7, 17, 27, 0.1)
+        .title
+          float: left
+          font-size: 14px
+          color: rgb(7, 17, 27)
+        .empty
+          float: right
+          font-size: 12px
+          color: rgb(0, 160, 220)
+
+      .list-content
+        padding: 0 18px
+        max-height: 217px
+        overflow: hidden
+        background: #fff
+        .food
+          position: relative
+          padding: 12px 0
+          box-sizing: border-box
+          border-1px(rgba(7, 17, 27, 0.1))
+          .name
+            line-height: 24px
+            font-size: 14px
+            color: rgb(7, 17, 27)
+          .price
+            position: absolute
+            right: 90px
+            bottom: 12px
+            line-height: 24px
+            font-size: 14px
+            font-weight: 700
+            color: rgb(240, 20, 20)
+          .cartcontrol-wrapper
+            position: absolute
+            right: 0
+            bottom: 6px
+
+      /*对于动画,最好把两个*/
+      &.fold-leave-active
+        /*退出过渡的过程*/
+        transition: all 0.5s
+        transform: translate3d(0, 0, 0)
+      &.fold-enter-active
+        /*进入过度的过程*/
+        transition: all 0.5s
+      &.fold-enter
+        /*表示进入过渡启动的那个时刻*/
+        transform: translate3d(0, 0, 0)
+    .mask
+      position: fixed
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
+      z-index: -2
+      color: rgba(7, 17, 27, 0.6)
+      backdrop-filter blur(10px)
+      &.fade-enter-active, &.fade-leave-active
+        transition: all 0.5s
+      &.fade-enter
+        opacity: 0
+        background: rgba(7, 17, 27, 0)
+
 </style>
