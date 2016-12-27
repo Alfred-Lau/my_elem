@@ -1,12 +1,12 @@
 <template>
     <div class="ratingselect">
         <div class="rating-type">
-            <span @click="select(2,$event)" class="block positive"  :class="{'active':selectType===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
-            <span @click="select(0,$event)" class="block positive" :class="{'active':selectType===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
-            <span @click="select(1,$event)" class="block negative" :class="{'active':selectType===1}">{{desc.negative}}<span class="count">{{negatives.length}}</span></span>
+            <span @click="select(2,$event)" class="block positive"  :class="{'active':selectOption===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
+            <span @click="select(0,$event)" class="block positive" :class="{'active':selectOption===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
+            <span @click="select(1,$event)" class="block negative" :class="{'active':selectOption===1}">{{desc.negative}}<span class="count">{{negatives.length}}</span></span>
         </div>
         <div class="switch" @click="toggleContent">
-            <span class="icon-check_circle" :class="{'on': onlyContent}"></span>
+            <span class="icon-check_circle" :class="{'on': onlyOption}"></span>
             <span class="text">只看有内容的评价</span>
         </div>
     </div>
@@ -44,6 +44,12 @@
                 default: false
             }
         },
+        data () {
+            return {
+                onlyOption: this.onlyContent,
+                selectOption: this.selectType
+            }
+        },
         computed: {
             positives () {
                 return this.ratings.filter((rating) => {
@@ -61,15 +67,15 @@
                 if (!event._constructed) {
                     return
                 }
-                this.selectType = rateType
-                this.$emit('ratetype.select', rateType)
+                this.selectOption = rateType
+                this.$emit('ratetypeselect', rateType)
             },
             toggleContent (event) {
                 if (!event._constructed) {
                     return
                 }
-                this.onlyContent = !this.onlyContent
-                this.$emit('content.toggle', this.onlyContent)
+                this.onlyOption = !this.onlyOption
+                this.$emit('onlytoggle', this.onlyOption)
             }
         }
     }
