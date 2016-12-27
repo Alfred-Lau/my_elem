@@ -111,7 +111,6 @@
             }
           })
         }
-        console.log(show)
         return show
       },
       totalPrice () {

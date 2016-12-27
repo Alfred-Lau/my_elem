@@ -16,7 +16,7 @@
         <li v-for="item in goods" class="good-item food-list-hock">
           <h1 class="title"> {{ item.name }} </h1>
           <ul>
-            <li class="food-item" v-for="food in item.foods">
+            <li class="food-item" v-for="food in item.foods" @click="selectFood(food, $event)">
               <div class="food-wrapper">
                 <div class="icon">
                   <img width="57px" height="57px" :src="food.icon">
@@ -43,7 +43,8 @@
         </li>
       </ul>
     </div>
-    <shopcart ref="shopcart" :select-food="selectFood" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
+    <shopcart ref="shopcart" :select-food="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
+    <food :food="selectedFood" @cartadd="cartAdd" ref="food"></food>
   </div>
 </template>
 
@@ -51,6 +52,7 @@
   import BScroll from 'better-scroll'
   import shopcart from 'components/shopcart/shopcart'
   import cartcontrol from 'components/cartcontrol/cartcontrol'
+  import food from 'components/food/food'
 
   export default {
     props: {
@@ -60,14 +62,16 @@
     },
     components: {
       shopcart,
-      cartcontrol
+      cartcontrol,
+      food
     },
     data () {
       return {
         goods: [],
         classMap: ['decrease', 'discount', 'special', 'invoice', 'guarantee'],
         scrollY: 0,
-        listHeight: []
+        listHeight: [],
+        selectedFood: {}
       }
     },
     computed: {
@@ -81,7 +85,7 @@
         }
         return 0
       },
-      selectFood () {
+      selectFoods () {
         let foods = []
         this.goods.forEach((good) => {
           good.foods.forEach((food) => {
@@ -106,7 +110,15 @@
       })
     },
     methods: {
+      selectFood (food, e) {
+        if (!e._constructed) {
+          return
+        }
+        this.selectedFood = food
+        this.$refs.food.show()
+      },
       cartAdd (target) {
+        console.log('dsds')
         this.$refs.shopcart.drop(target)
       },
       selectMenu (index, event) {
