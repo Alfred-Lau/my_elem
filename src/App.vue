@@ -7,19 +7,25 @@
       <router-link class="tab-item" to="/ratings">评论</router-link>
       <router-link class="tab-item" to="/seller">商家</router-link>
     </div>
-    <router-view :seller="seller"></router-view>
+    <router-view :seller="seller" keep-alive></router-view>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import header from 'components/header/header'
+  import {urlParse} from 'common/js/utils'
 
   const ERR_OK = 0
 
   export default{
     data () {
       return {
-        seller: {}
+        seller: {
+          id: (() => {
+              let queryParam = urlParse()
+              return queryParam.id
+          })()
+        }
       }
     },
     components: {
@@ -30,12 +36,11 @@
     },
     methods: {
       getData () {
-        this.$http.get('/api/seller').then((res) => {
+        this.$http.get('/api/seller?id=' + this.seller.id).then((res) => {
           res = res.body
           if (res.errno === ERR_OK) {
             console.log('name')
-            this.seller = res.data
-            console.log(this.seller)
+              this.seller = Object.assign({}, this.seller, res.data)
           }
         })
       }
