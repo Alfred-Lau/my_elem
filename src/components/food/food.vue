@@ -112,6 +112,7 @@
             },
             ratetypeselect (type) {
                 this.selectType = type
+                // 异步更新
                 this.$nextTick(() => {
                     this.scroll.refresh()
                 })
