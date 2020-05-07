@@ -66,6 +66,9 @@
     import star from 'components/star/star'
     import ratingselect from 'components/ratingselect/ratingselect'
     import {formatDate} from 'common/js/date'
+    import mock from '../../../data.json'
+
+    const {ratings=[]} = mock
 
     const ERR_OK = 0
     const ALL = 2
@@ -129,7 +132,17 @@
                         this.scroll = new BScroll(this.$refs.ratings, {click: true})
                         console.log(this.scroll)
                     })
+                } else {
+                  this.ratings = ratings
+                  this.$nextTick(() => {
+                    this.scroll = new BScroll(this.$refs.ratings, {click: true})
+                  })
                 }
+            }).catch(() => {
+               this.ratings = ratings
+                this.$nextTick(() => {
+                  this.scroll = new BScroll(this.$refs.ratings, {click: true})
+                })
             })
         },
         components: {

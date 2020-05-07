@@ -53,6 +53,9 @@
   import shopcart from 'components/shopcart/shopcart'
   import cartcontrol from 'components/cartcontrol/cartcontrol'
   import food from 'components/food/food'
+  import mock from '../../../data.json'
+
+  const {goods = []} = mock
 
   export default {
     props: {
@@ -106,7 +109,19 @@
             this._initScroll()
             this._caculateHeight()
           })
+        } else {
+          this.goods = goods
+          this.$nextTick(() => {
+            this._initScroll()
+            this._caculateHeight()
+          })
         }
+      }).catch(() => {
+           this.goods = goods
+          this.$nextTick(() => {
+            this._initScroll()
+            this._caculateHeight()
+          })
       })
     },
     methods: {
